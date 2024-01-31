@@ -32,13 +32,13 @@ def write_yaml_file(file_path: str, content: object, replace: bool = False) -> N
     except Exception as e:
         raise AppException(e, sys)
     
-def decode_image(imstring, file_name):
-    imgdata = base64.b64decode(imstring)
+def decode_image(imgstring, file_name):
+    imgdata = base64.b64decode(imgstring)
+    with open("./data/" + file_name, 'wb') as f:
+        f.write(imgdata)
+        f.close()
 
-    with open(file_name, 'w') as file:
-        file.write(imgdata)
-        file.close()
 
 def encode_image_to_base64(cropped_image_path):
-    with open(cropped_image_path, 'r') as file:
-        return base64.b64encode(file.read())
+    with open(cropped_image_path, "rb") as f:
+        return base64.b64encode(f.read())
