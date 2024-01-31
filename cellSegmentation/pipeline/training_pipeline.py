@@ -2,15 +2,20 @@ import sys
 import os
 from cellSegmentation.logger import logging
 from cellSegmentation.exception import AppException
+
 from cellSegmentation.components.data_ingestion import DataIngestion
 from cellSegmentation.components.data_validation import DataValidation
+from cellSegmentation.components.model_trainer import ModelTrainer
+
 from cellSegmentation.entity.config_entity import (
     DataIngestionConfig,
-    DataValidationConfig
+    DataValidationConfig,
+    ModelTrainerConfig
 )
 from cellSegmentation.entity.artifacts_entity import (
     DataIngestionArtifact,
-    DataValidationArtifact
+    DataValidationArtifact,
+    ModelTrainerArtifact
 )
 
 
@@ -18,6 +23,7 @@ class TrainPipeline:
     def __init__(self):
         self.data_ingestion_config = DataIngestionConfig()
         self.data_validation_config = DataValidationConfig()
+        self.model_trainer_config = ModelTrainerConfig()
 
     def start_data_ingestion(self) -> DataIngestionArtifact:
         try:
@@ -29,6 +35,7 @@ class TrainPipeline:
             )
 
             data_ingestion_artifact = data_ingestion.initiate_data_ingestion()
+
             logging.info("Got the data from URL")
             logging.info("Exited the start_data_ingestion method of TrainPipeline class")
 
@@ -53,10 +60,26 @@ class TrainPipeline:
             data_validation_artifact = data_validation.initiate_data_validation()
 
             logging.info("Performed data validation operation")
-
             logging.info("Exited start_data_validation method of TrainPipeline class")
 
             return data_validation_artifact
+        
+        except Exception as e:
+            raise AppException(e, sys)
+        
+    def strart_model_trainer(self) -> ModelTrainerArtifact:
+        logging.info("Entered strart_model_trainer method of TrainPipeline class")
+
+        try:
+            model_trainer = ModelTrainer(
+                model_trainer_config=self.model_trainer_config
+            )
+            model_trainer_artifact = model_trainer.initiate_model_trainer()
+
+            logging.info("Performed training model operation")
+            logging.info("Exited strart_model_trainer method of TrainPipeline class")
+
+            return model_trainer_artifact
         
         except Exception as e:
             raise AppException(e, sys)
@@ -67,6 +90,11 @@ class TrainPipeline:
             data_validation_artifact = self.start_data_validation(
                 data_ingestion_artifact=data_ingestion_artifact
             )
+
+            if data_validation_artifact.validation_status == True:
+                model_trainer_artifact = self.strart_model_trainer()
+            else:
+                raise Exception("Your data is not in correct format")
         
         except Exception as e:
             raise AppException(e, sys)
