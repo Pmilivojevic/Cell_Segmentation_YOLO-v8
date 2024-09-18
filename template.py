@@ -4,7 +4,7 @@ from pathlib import Path
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s]: %(message)s:')
 
-project_name = "cellSegmentation"
+project_name = "cellseg"
 
 list_of_files = [
     ".github/workflows/.gitkeep",
@@ -13,10 +13,15 @@ list_of_files = [
     f"{project_name}/components/__init__.py",
     f"{project_name}/components/data_ingestion.py",
     f"{project_name}/components/data_validation.py",
+    f"{project_name}/components/data_transformation.py",
     f"{project_name}/components/model_trainer.py",
+    f"{project_name}/components/model_evaluation.py",
     f"{project_name}/constant/__init__.py",
     f"{project_name}/constant/training_pipeline/__init__.py",
     f"{project_name}/constant/application.py",
+    f"{project_name}/config/__init__.py",
+    f"{project_name}/config/configuration.py",
+    f"{project_name}/entity/__init__.py",
     f"{project_name}/entity/config_entity.py",
     f"{project_name}/entity/artifacts_entity.py",
     f"{project_name}/exception/__init__.py",
@@ -25,8 +30,12 @@ list_of_files = [
     f"{project_name}/pipeline/training_pipeline.py",
     f"{project_name}/utils/__init__.py",
     f"{project_name}/utils/main_utils.py",
+    "config/config.yaml",
+    "params.yaml",
+    "schema.yaml",
     "research/trials.ipynb",
     "templates/index.html",
+    "main.py",
     "app.py",
     "Dockerfile",
     "requirements.txt",

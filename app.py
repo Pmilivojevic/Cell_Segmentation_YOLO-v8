@@ -1,9 +1,9 @@
 import sys
 import os
 
-from cellSegmentation.pipeline.training_pipeline import TrainPipeline
-from cellSegmentation.utils.main_utils import decode_image, encode_image_to_base64
-from cellSegmentation.constant.application import APP_HOST, APP_PORT
+from cellseg.pipeline.training_pipeline import TrainPipeline
+from cellseg.utils.main_utils import decode_image, encode_image_to_base64
+from cellseg.constant.application import APP_HOST, APP_PORT
 
 from flask import Flask, request, jsonify, render_template, Response
 from flask_cors import CORS, cross_origin

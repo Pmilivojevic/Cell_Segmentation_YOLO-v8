@@ -160,3 +160,7 @@ cython_debug/
 #.idea/
 
 artifacts/*
+
+data/stage1_test
+
+data/stage1_train

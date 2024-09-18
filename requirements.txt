@@ -5,5 +5,14 @@ gdown
 flask-cors
 flask
 ultralytics==8.0.28
+numpy
+opencv-python
+matplotlib
+python-box==6.0.2
+pyYAML
+tqdm
+joblib
+types-PyYAML
+python-dotenv
 
 -e .
