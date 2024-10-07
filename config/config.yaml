@@ -1,0 +1,13 @@
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  competition_name: data-science-bowl-2018
+  train_dataset_filename: stage1_train.zip
+  test_dataset_filename: stage1_test.zip
+
+data_validation:
+  root_dir: artifacts/data_validation
+  train_dataset: artifacts/data_ingestion/train
+  test_dataset: artifacts/data_ingestion/test
+  STATUS_FILE: artifacts/data_validation/status.txt

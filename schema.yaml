@@ -1,0 +1,3 @@
+FOLDER_STRUCTURE:
+  train: ['masks', 'images']
+  test: ['images']
