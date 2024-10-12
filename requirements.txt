@@ -5,6 +5,7 @@ gdown
 flask-cors
 flask
 ultralytics==8.0.28
+scikit-learn
 numpy
 opencv-python
 matplotlib
@@ -16,5 +17,6 @@ types-PyYAML
 python-dotenv
 kaggle
 ensure==1.0.2
+albumentations
 
 -e .

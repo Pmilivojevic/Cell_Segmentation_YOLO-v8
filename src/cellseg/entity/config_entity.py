@@ -19,3 +19,14 @@ class DataValidationConfig:
     test_dataset: Path
     STATUS_FILE: Path
     schema: dict
+
+
+@dataclass(frozen=True)
+class DataTransformationConfig:
+    root_dir: Path
+    data_path: Path
+    train_path: Path
+    validation_path: Path
+    val_size: float
+    apply_aug: bool
+    aug_size: int

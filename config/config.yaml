@@ -11,3 +11,12 @@ data_validation:
   train_dataset: artifacts/data_ingestion/train
   test_dataset: artifacts/data_ingestion/test
   STATUS_FILE: artifacts/data_validation/status.txt
+
+data_transformation:
+  root_dir: artifacts/data_transformation
+  data_path: artifacts/data_ingestion/train
+  train_path: artifacts/data_transformation/train
+  validation_path: artifacts/data_transformation/validation
+  val_size: 0.2
+  apply_aug: True
+  aug_size: 5

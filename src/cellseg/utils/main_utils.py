@@ -9,7 +9,6 @@ from box import ConfigBox
 from pathlib import Path
 from typing import Any, Union
 
-
 @ensure_annotations
 def create_directories(path_to_directories: list, verbose: bool=True):
     """create list of directories

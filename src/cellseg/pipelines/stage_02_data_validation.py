@@ -1,4 +1,4 @@
-from src.cellseg.config.configuration import CofigurationMananger
+from src.cellseg.config.configuration import ConfigurationMananger
 # from src.cellseg.components.data_ingestion import DataIngestion
 from src.cellseg.components.data_validation import DataValidation
 # from src.cellseg import logger
@@ -10,7 +10,7 @@ class DataValidationTrainingPipeline:
         pass
     
     def main(self):
-        config = CofigurationMananger()
+        config = ConfigurationMananger()
         data_validation_config = config.get_data_validation_config()
         data_validation = DataValidation(config=data_validation_config)
         data_validation.validate_dataset()

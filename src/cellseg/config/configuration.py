@@ -1,9 +1,13 @@
 from src.cellseg.constant import *
 from src.cellseg.utils.main_utils import create_directories, read_yaml
-from src.cellseg.entity.config_entity import DataIngestionConfig, DataValidationConfig
+from src.cellseg.entity.config_entity import (
+    DataIngestionConfig,
+    DataValidationConfig,
+    DataTransformationConfig
+)
 import os
 
-class CofigurationMananger:
+class ConfigurationMananger:
     def __init__(
         self,
         config_file_path = CONFIG_FILE_PATH,
@@ -53,3 +57,21 @@ class CofigurationMananger:
         )
         
         return data_validation_config
+    
+    def get_data_transformation_config(self) -> DataTransformationConfig:
+        config = self.config.data_transformation
+        
+        create_directories([config.root_dir, config.train_path, config.validation_path])
+        
+        data_transformation_config = DataTransformationConfig(
+            root_dir=config.root_dir,
+            data_path=config.data_path,
+            train_path=config.train_path,
+            validation_path=config.validation_path,
+            val_size=config.val_size,
+            apply_aug=config.apply_aug,
+            aug_size=config.aug_size
+        )
+        
+        return data_transformation_config
+    

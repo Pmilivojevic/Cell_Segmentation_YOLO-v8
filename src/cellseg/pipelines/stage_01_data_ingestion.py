@@ -1,4 +1,4 @@
-from src.cellseg.config.configuration import CofigurationMananger
+from src.cellseg.config.configuration import ConfigurationMananger
 from src.cellseg.components.data_ingestion import DataIngestion
 from src.cellseg import logger
 
@@ -9,7 +9,7 @@ class DataIngestionTrainingPipeline:
         pass
     
     def main(self):
-        config = CofigurationMananger()
+        config = ConfigurationMananger()
         data_ingestion_config = config.get_data_ingestion_config()
         data_ingestion = DataIngestion(config=data_ingestion_config)
         data_ingestion.download_dataset()
