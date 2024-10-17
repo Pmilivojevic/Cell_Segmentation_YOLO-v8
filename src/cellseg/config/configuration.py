@@ -60,6 +60,7 @@ class ConfigurationMananger:
     
     def get_data_transformation_config(self) -> DataTransformationConfig:
         config = self.config.data_transformation
+        params = self.params.augmentation
         
         create_directories([config.root_dir, config.train_path, config.validation_path])
         
@@ -70,8 +71,8 @@ class ConfigurationMananger:
             validation_path=config.validation_path,
             val_size=config.val_size,
             apply_aug=config.apply_aug,
-            aug_size=config.aug_size
+            aug_size=config.aug_size,
+            aug_params=params
         )
         
         return data_transformation_config
-    

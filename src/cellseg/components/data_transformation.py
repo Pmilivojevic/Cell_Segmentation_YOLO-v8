@@ -26,13 +26,38 @@ class DataTransformation:
             crop_dim = min(image.shape[0], image.shape[1])
             
             transform = A.Compose([
-                A.Crop(x_min=0, y_min=0, x_max=crop_dim, y_max=crop_dim, always_apply=True),
-                A.Resize(height=256, width=256, always_apply=True),
-                A.RandomBrightnessContrast(brightness_limit=0.18, contrast_limit=0.18, p=0.5),
-                A.RandomGamma(gamma_limit=(95, 105), p=0.5),
-                A.Rotate(limit=120, p=0.7, border_mode=cv2.BORDER_REFLECT),
-                A.HorizontalFlip(p=0.8),
-                A.VerticalFlip(p=0.8)
+                A.Crop(
+                    x_min=self.config.aug_params.Crop.x_min,
+                    y_min=self.config.aug_params.Crop.y_min,
+                    x_max=crop_dim,
+                    y_max=crop_dim,
+                    p=self.config.aug_params.Crop.p
+                ),
+                A.Resize(
+                    height=self.config.aug_params.Resize.height,
+                    width=self.config.aug_params.Resize.width,
+                    p=self.config.aug_params.Resize.p
+                ),
+                A.RandomBrightnessContrast(
+                    brightness_limit=self.config.aug_params.RandomBrightnessContrast.brightness_limit,
+                    contrast_limit=self.config.aug_params.RandomBrightnessContrast.contrast_limit,
+                    p=self.config.aug_params.RandomBrightnessContrast.p
+                ),
+                A.RandomGamma(
+                    gamma_limit=self.config.aug_params.RandomGamma.gamma_limit,
+                    p=self.config.aug_params.RandomGamma.p
+                ),
+                A.Rotate(
+                    limit=self.config.aug_params.Rotate.limit,
+                    border_mode=self.config.aug_params.Rotate.border_mode,
+                    p=self.config.aug_params.Rotate.p
+                ),
+                A.HorizontalFlip(
+                    p=self.config.aug_params.HorizontalFlip.p
+                ),
+                A.VerticalFlip(
+                    p=self.config.aug_params.VerticalFlip.p
+                )
             ])
             
             masks_list = []

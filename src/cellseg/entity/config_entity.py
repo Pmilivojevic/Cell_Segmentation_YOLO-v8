@@ -30,3 +30,4 @@ class DataTransformationConfig:
     val_size: float
     apply_aug: bool
     aug_size: int
+    aug_params: dict
