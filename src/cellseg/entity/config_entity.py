@@ -31,3 +31,13 @@ class DataTransformationConfig:
     apply_aug: bool
     aug_size: int
     aug_params: dict
+
+
+@dataclass(frozen=True)
+class ModelTrainerConfig:
+    root_dir: Path
+    results: Path
+    experiment_name: str
+    model_name: str
+    dataset_yaml: Path
+    model_params: dict

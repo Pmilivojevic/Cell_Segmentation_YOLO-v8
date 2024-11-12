@@ -2,12 +2,12 @@ augmentation:
   Crop:
     x_min: 0
     y_min: 0
-    x_max: 255
-    y_max_: 255
+    x_max: 256
+    y_max_: 256
     p: 1
   Resize:
-    height: 255
-    width: 255
+    height: 256
+    width: 256
     p: 1
   RandomBrightnessContrast:
     brightness_limit: 0.18
@@ -26,3 +26,24 @@ augmentation:
     p: 0.8
 
 model:
+  epochs: 200
+  patience: 0
+  batch: 32
+  imgsz: 256
+  device: 0
+  workers: 4
+  pretrained: True
+  optimizer: Adam
+  verbose: True
+  deterministic: True
+  cos_lr: False
+  close_mosaic: 10
+  freeze: None
+  lr0: 0.01
+  lrf: 0.01
+  momentum: 0.937
+  weight_decay: 0.0005
+  warmup_epochs: 4
+  warmup_bias_lr: 0.1
+  dropout: 0.0
+  plots: True

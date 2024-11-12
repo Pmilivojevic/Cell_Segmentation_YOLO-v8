@@ -3,7 +3,8 @@ from src.cellseg.utils.main_utils import create_directories, read_yaml
 from src.cellseg.entity.config_entity import (
     DataIngestionConfig,
     DataValidationConfig,
-    DataTransformationConfig
+    DataTransformationConfig,
+    ModelTrainerConfig
 )
 import os
 
@@ -76,3 +77,20 @@ class ConfigurationMananger:
         )
         
         return data_transformation_config
+    
+    def get_model_trainer_config(self) -> ModelTrainerConfig:
+        config = self.config.model_trainer
+        params = self.params.model
+        
+        create_directories([config.results])
+        
+        model_trainer_config = ModelTrainerConfig(
+            root_dir=config.root_dir,
+            results=config.results,
+            experiment_name=config.experiment_name,
+            model_name=config.model_name,
+            dataset_yaml=config.dataset_yaml,
+            model_params=params
+        )
+        
+        return model_trainer_config

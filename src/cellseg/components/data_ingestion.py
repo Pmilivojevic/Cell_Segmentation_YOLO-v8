@@ -2,7 +2,7 @@ import os
 from src.cellseg.utils.main_utils import get_size, create_directories
 from src.cellseg.entity.config_entity import DataIngestionConfig
 import zipfile
-import kaggle
+# import kaggle
 from src.cellseg import logger
 import subprocess
 from pathlib import Path
