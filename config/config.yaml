@@ -25,7 +25,6 @@ data_transformation:
 
 model_trainer:
   root_dir: artifacts/model_trainer
-  results: artifacts/model_trainer/results
   experiment_name: 200_epochs_
-  model_name: yolov8n-seg.pt
+  model_names: [yolov8n-seg.pt, yolo11n-seg.pt]
   dataset_yaml: artifacts/data_transformation/dataset.yaml

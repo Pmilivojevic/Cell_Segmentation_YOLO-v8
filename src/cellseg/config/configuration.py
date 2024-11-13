@@ -63,6 +63,13 @@ class ConfigurationMananger:
         config = self.config.data_transformation
         params = self.params.augmentation
         
+        dataset_val_status_file = self.config.data_validation.STATUS_FILE
+        
+        with open(dataset_val_status_file, 'r') as f:
+            status = f.read()
+        
+        status = bool(str.split(status)[-1])
+        
         create_directories([config.root_dir, config.train_path, config.validation_path])
         
         data_transformation_config = DataTransformationConfig(
@@ -70,10 +77,13 @@ class ConfigurationMananger:
             data_path=config.data_path,
             train_path=config.train_path,
             validation_path=config.validation_path,
+            test_path=config.test_path,
+            YAML_path=config.YAML_path,
             val_size=config.val_size,
             apply_aug=config.apply_aug,
             aug_size=config.aug_size,
-            aug_params=params
+            aug_params=params,
+            dataset_val_status=status
         )
         
         return data_transformation_config
@@ -82,13 +92,10 @@ class ConfigurationMananger:
         config = self.config.model_trainer
         params = self.params.model
         
-        create_directories([config.results])
-        
         model_trainer_config = ModelTrainerConfig(
             root_dir=config.root_dir,
-            results=config.results,
             experiment_name=config.experiment_name,
-            model_name=config.model_name,
+            model_names=config.model_names,
             dataset_yaml=config.dataset_yaml,
             model_params=params
         )

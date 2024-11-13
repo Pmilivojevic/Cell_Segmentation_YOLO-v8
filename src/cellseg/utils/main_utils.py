@@ -2,6 +2,7 @@ import os
 from box.exceptions import BoxValueError
 import yaml
 from src.cellseg import logger
+import zipfile
 import json
 import joblib
 from ensure import ensure_annotations
@@ -89,3 +90,15 @@ def folder_content_validation(
                 file.write(f"{str.split(folder_dir, '/')[-1]} validation status: {validation_status}\n")
     
     return validation_status
+
+@ensure_annotations
+def zip_file_extraction(local_path, unzip_path):
+    if os.path.exists(local_path):
+        with zipfile.ZipFile(local_path, 'r') as zip_ref:
+            zip_ref.extractall(unzip_path)
+        
+        logger.info(f"File {str.split(local_path,'/')[-1]} extracted!")
+        
+        os.remove(local_path)
+    else:
+        logger.info(f"File {str.split(local_path,'/')[-1]} does not exist!")

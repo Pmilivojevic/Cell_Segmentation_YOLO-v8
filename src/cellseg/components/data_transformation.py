@@ -8,10 +8,51 @@ import yaml
 from src.cellseg.entity.config_entity import DataTransformationConfig
 import os
 
-
 class DataTransformation:
     def __init__(self, config: DataTransformationConfig):
         self.config = config
+    
+    def transform_preparation(self, crop_dim):
+        transform = A.Compose([
+            A.Crop(
+                x_min=self.config.aug_params.Crop.x_min,
+                y_min=self.config.aug_params.Crop.y_min,
+                x_max=crop_dim,
+                y_max=crop_dim,
+                p=self.config.aug_params.Crop.p
+            ),
+            A.Resize(
+                height=self.config.aug_params.Resize.height,
+                width=self.config.aug_params.Resize.width,
+                p=self.config.aug_params.Resize.p
+            ),
+            A.RandomBrightnessContrast(
+                brightness_limit=self.config.aug_params.RandomBrightnessContrast.brightness_limit,
+                contrast_limit=self.config.aug_params.RandomBrightnessContrast.contrast_limit,
+                p=self.config.aug_params.RandomBrightnessContrast.p
+            ),
+            A.RandomGamma(
+                gamma_limit=self.config.aug_params.RandomGamma.gamma_limit,
+                p=self.config.aug_params.RandomGamma.p
+            ),
+            A.Rotate(
+                limit=self.config.aug_params.Rotate.limit,
+                border_mode=self.config.aug_params.Rotate.border_mode,
+                p=self.config.aug_params.Rotate.p
+            ),
+            A.HorizontalFlip(
+                p=self.config.aug_params.HorizontalFlip.p
+            ),
+            A.VerticalFlip(
+                p=self.config.aug_params.VerticalFlip.p
+            ),
+            A.RandomResizedCrop(
+                scale=(0.5,1.0),
+                size=(self.config.aug_params.Resize.height, self.config.aug_params.Resize.width)
+            )
+        ])
+        
+        return transform
 
     def data_augmentation(self):
         logger.info("Data augmentation started!")
@@ -25,40 +66,7 @@ class DataTransformation:
             image = cv2.cvtColor(cv2.imread(img_path, 1), cv2.COLOR_BGR2RGB)
             crop_dim = min(image.shape[0], image.shape[1])
             
-            transform = A.Compose([
-                A.Crop(
-                    x_min=self.config.aug_params.Crop.x_min,
-                    y_min=self.config.aug_params.Crop.y_min,
-                    x_max=crop_dim,
-                    y_max=crop_dim,
-                    p=self.config.aug_params.Crop.p
-                ),
-                A.Resize(
-                    height=self.config.aug_params.Resize.height,
-                    width=self.config.aug_params.Resize.width,
-                    p=self.config.aug_params.Resize.p
-                ),
-                A.RandomBrightnessContrast(
-                    brightness_limit=self.config.aug_params.RandomBrightnessContrast.brightness_limit,
-                    contrast_limit=self.config.aug_params.RandomBrightnessContrast.contrast_limit,
-                    p=self.config.aug_params.RandomBrightnessContrast.p
-                ),
-                A.RandomGamma(
-                    gamma_limit=self.config.aug_params.RandomGamma.gamma_limit,
-                    p=self.config.aug_params.RandomGamma.p
-                ),
-                A.Rotate(
-                    limit=self.config.aug_params.Rotate.limit,
-                    border_mode=self.config.aug_params.Rotate.border_mode,
-                    p=self.config.aug_params.Rotate.p
-                ),
-                A.HorizontalFlip(
-                    p=self.config.aug_params.HorizontalFlip.p
-                ),
-                A.VerticalFlip(
-                    p=self.config.aug_params.VerticalFlip.p
-                )
-            ])
+            transform = self.transform_preparation(crop_dim)
             
             masks_list = []
             for cell_mask in os.listdir(os.path.join(self.config.data_path, dir, 'masks')):
@@ -96,8 +104,7 @@ class DataTransformation:
                         os.path.join(dir_mask_path, dir + '_mask_' + str(i) + '.png'),
                         mask
                     )
-            
-            # shutil.rmtree(os.path.join(self.config.data_path, dir))
+        
         logger.info("Data augmentation finished!")
 
     def data_to_YOLO_formating(self):
@@ -177,26 +184,36 @@ class DataTransformation:
     
     def dataset_yaml_creation(self):
         yaml_content = {
-            'train': self.config.train_path,
-            'val': self.config.validation_path,
-            'test': 'artifacts/data_ingestion/test',
+            'train': os.path.join(os.getcwd(), self.config.train_path),
+            'val': os.path.join(os.getcwd(), self.config.validation_path),
+            'test': '',
             'nc': 1,
             'names': ['Cell']
         }
         
         yaml_file = yaml.safe_dump(yaml_content, default_flow_style=None, sort_keys=False)
         
-        with open(os.path.join(self.config.root_dir, 'dataset.yaml'), 'w') as file:
+        with open(self.config.YAML_path, 'w') as file:
             file.write(yaml_file)
         logger.info("File dataset.yaml created!")
 
-    def sequence_transformation(self):
-        if self.config.apply_aug:
-            self.data_augmentation()
-            self.data_to_YOLO_formating()
-            self.train_validation_separation()
-            self.dataset_yaml_creation()
+    def transformation_compose(self):
+        if self.config.dataset_val_status:
+            if not os.listdir(self.config.train_path) and not os.listdir(self.config.validation_path):
+                if self.config.apply_aug:
+                    self.data_augmentation()
+                    self.data_to_YOLO_formating()
+                    self.train_validation_separation()
+                else:
+                    self.data_to_YOLO_formating()
+                    self.train_validation_separation()
+                
+                self.dataset_yaml_creation()
+                
+            elif not os.path.exists(self.config.YAML_path):
+                logger.info("Transformation already performed!")
+                self.dataset_yaml_creation()
+            else:
+                logger.info("Transformation already performed!")
         else:
-            self.data_to_YOLO_formating()
-            self.train_validation_separation()
-            self.dataset_yaml_creation()
+            logger.info("Transformation stoped, dataset isn't valid!")

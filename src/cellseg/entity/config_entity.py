@@ -27,17 +27,19 @@ class DataTransformationConfig:
     data_path: Path
     train_path: Path
     validation_path: Path
+    test_path: Path
+    YAML_path: Path
     val_size: float
     apply_aug: bool
     aug_size: int
     aug_params: dict
+    dataset_val_status: bool
 
 
 @dataclass(frozen=True)
 class ModelTrainerConfig:
     root_dir: Path
-    results: Path
     experiment_name: str
-    model_name: str
+    model_names: list
     dataset_yaml: Path
     model_params: dict

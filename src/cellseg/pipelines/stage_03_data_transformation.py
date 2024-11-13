@@ -13,7 +13,7 @@ class DataTransformationTrainingPipeline:
         config = ConfigurationMananger()
         data_transformation_config = config.get_data_transformation_config()
         data_transformation = DataTransformation(config=data_transformation_config)
-        data_transformation.sequence_transformation()
+        data_transformation.transformation_compose()
 
 
 # if __name__ == "__main__":
