@@ -2,12 +2,12 @@ augmentation:
   Crop:
     x_min: 0
     y_min: 0
-    x_max: 256
-    y_max_: 256
+    x_max: 512
+    y_max_: 512
     p: 1
   Resize:
-    height: 256
-    width: 256
+    height: 512
+    width: 512
     p: 1
   RandomBrightnessContrast:
     brightness_limit: 0.18
@@ -21,15 +21,16 @@ augmentation:
     border_mode: 2
     p: 0.7
   HorizontalFlip:
-    p: 0.8
+    p: 0.6
   VerticalFlip:
-    p: 0.8
+    p: 0.6
 
 model:
+  name: 200_epochs_
   epochs: 200
   patience: 0
-  batch: 32
-  imgsz: 256
+  batch: 16
+  imgsz: 512
   device: 0
   workers: 4
   pretrained: True
@@ -40,10 +41,14 @@ model:
   close_mosaic: 10
   freeze: None
   lr0: 0.01
-  lrf: 0.01
+  lrf: 0.001
   momentum: 0.937
   weight_decay: 0.0005
   warmup_epochs: 4
   warmup_bias_lr: 0.1
   dropout: 0.0
   plots: True
+  augment: False
+  auto_augment: None
+  mosaic: 0.0
+  mask_ratio: 1

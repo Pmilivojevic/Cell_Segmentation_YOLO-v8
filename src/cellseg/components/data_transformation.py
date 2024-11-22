@@ -1,12 +1,15 @@
 from src.cellseg import logger
+from src.cellseg.utils.main_utils import dir_sample_creation
 import shutil
 import cv2
+import numpy as np
 from sklearn.model_selection import train_test_split
 import albumentations as A
 from tqdm import tqdm
 import yaml
 from src.cellseg.entity.config_entity import DataTransformationConfig
 import os
+import random
 
 class DataTransformation:
     def __init__(self, config: DataTransformationConfig):
@@ -53,111 +56,107 @@ class DataTransformation:
         ])
         
         return transform
-
-    def data_augmentation(self):
-        logger.info("Data augmentation started!")
-        for dir in tqdm(os.listdir(self.config.data_path)):
+    
+    def balance_augment_data_lists(self):
+        color_list = []
+        grayscale_list = []
+        
+        for folder in tqdm(os.listdir(self.config.data_path)):
+            img = cv2.imread(os.path.join(
+                self.config.data_path,
+                folder,
+                'images',
+                folder + '.png'
+            ))
+            
+            if np.array_equal(img[:,:,0], img[:,:,1]) and np.array_equal(img[:,:,1], img[:,:,2]):
+                grayscale_list.append(folder + '.png')
+            else:
+                color_list.append(folder + '.png')
+        
+        if len(grayscale_list) >= len(color_list):
+            gray_aug_count = self.config.aug_size * len(grayscale_list) - len(grayscale_list)
+            color_aug_count = self.config.aug_size * len(grayscale_list) - len(color_list)
+        else:
+            gray_aug_count = self.config.aug_size * len(color_list) - len(grayscale_list)
+            color_aug_count = self.config.aug_size * len(color_list) - len(color_list)
+            
+        grayscale_list.extend(random.choices(grayscale_list, k=gray_aug_count))
+        color_list.extend(random.choices(color_list, k=color_aug_count))
+        
+        return grayscale_list, color_list
+    
+    def chunk_transform(self, chunk_list):
+        for img_name in tqdm(chunk_list):
             img_path = os.path.join(
                 self.config.data_path,
-                dir,
+                str.split(img_name, '.')[0],
                 'images',
-                dir + '.png'
+                img_name
             )
-            image = cv2.cvtColor(cv2.imread(img_path, 1), cv2.COLOR_BGR2RGB)
-            crop_dim = min(image.shape[0], image.shape[1])
             
+            image = cv2.cvtColor(cv2.imread(img_path, 1), cv2.COLOR_BGR2RGB)
+            
+            crop_dim = min(image.shape[0], image.shape[1])
             transform = self.transform_preparation(crop_dim)
             
-            masks_list = []
-            for cell_mask in os.listdir(os.path.join(self.config.data_path, dir, 'masks')):
+            masks = []
+            mask_dir = os.path.join(self.config.data_path, str.split(img_name, '.')[0], 'masks')
+            
+            for mask_name in os.listdir(mask_dir):
+                mask_img = cv2.imread(os.path.join(mask_dir, mask_name), 0)
+                masks.append(mask_img)
+            
+            composite_mask = np.stack(masks, axis=-1)
+            
+            augmentations = transform(image=image, mask=composite_mask)
+            
+            dir_sample_creation(augmentations, str.split(img_name, '.')[0], self.config.train_path)
+
+    def data_to_YOLO_formating(self):
+        logger.info("YOLO formating started!")
+            
+        for dir in tqdm(os.listdir(self.config.train_path)):
+            shutil.move(
+                os.path.join(
+                    self.config.train_path,
+                    dir,
+                    'images',
+                    dir + '.png',
+                ),
+                self.config.train_path
+            )
+            
+            masks = ''
+            
+            for cell_mask in os.listdir(os.path.join(self.config.train_path, dir, 'masks')):
+                
+                cell_mask_str = '0'
+
                 cell_mask_img = cv2.imread(os.path.join(
-                    self.config.data_path,
+                    self.config.train_path,
                     dir,
                     'masks',
                     cell_mask
                 ), 0)
+
+                contours, _ = cv2.findContours(
+                    cell_mask_img,
+                    cv2.RETR_LIST,
+                    cv2.CHAIN_APPROX_NONE
+                )
                 
-                masks_list.append(cell_mask_img)
+                if contours:
+                    for dot in contours[0]:
+                        cell_mask_str += ' ' + str(dot[0][0] / cell_mask_img.shape[1]) + ' ' + str(dot[0][1] / cell_mask_img.shape[0])
+
+                    masks += cell_mask_str + '\n'
+
+            with open(os.path.join(self.config.train_path, dir + '.txt'), 'w') as file:
+                file.write(masks)
             
-            for i in range(self.config.aug_size):
-                augmentations = transform(image=image, masks=masks_list)
+            shutil.rmtree(os.path.join(self.config.train_path, dir))
                 
-                dir_image_path = os.path.join(
-                    self.config.data_path,
-                    dir + '_' + str(i),
-                    'images',
-                )
-                os.makedirs(dir_image_path, exist_ok=True)
-                cv2.imwrite(
-                    os.path.join(dir_image_path, dir + '_' + str(i) + '.png'),
-                    augmentations['image']
-                )
-                
-                dir_mask_path = os.path.join(
-                    self.config.data_path,
-                    dir + '_' + str(i),
-                    'masks',
-                )
-                os.makedirs(dir_mask_path, exist_ok=True)
-                for i, mask in enumerate(augmentations['masks']):
-                    cv2.imwrite(
-                        os.path.join(dir_mask_path, dir + '_mask_' + str(i) + '.png'),
-                        mask
-                    )
-        
-        logger.info("Data augmentation finished!")
-
-    def data_to_YOLO_formating(self):
-        logger.info("YOLO formating started!")
-        if self.config.apply_aug:
-            marker = '_'
-        else:
-            marker = ''
-            
-        for dir in tqdm(os.listdir(self.config.data_path)):
-            if marker in dir:
-                img_path = os.path.join(
-                    self.config.data_path,
-                    dir,
-                    'images',
-                    dir + '.png'
-                )
-
-                if self.config.apply_aug:
-                    shutil.move(img_path, self.config.train_path)
-                else:
-                    shutil.copy2(img_path, self.config.train_path)
-
-                masks = ''
-                
-                for cell_mask in os.listdir(os.path.join(self.config.data_path, dir, 'masks')):
-                    
-                    cell_mask_str = '0'
-
-                    cell_mask_img = cv2.imread(os.path.join(
-                        self.config.data_path,
-                        dir,
-                        'masks',
-                        cell_mask
-                    ), 0)
-
-                    contours, _ = cv2.findContours(
-                        cell_mask_img,
-                        cv2.RETR_LIST,
-                        cv2.CHAIN_APPROX_SIMPLE
-                    )
-                    
-                    if contours:
-                        for dot in contours[0]:
-                            cell_mask_str += ' ' + str(dot[0][1] / 255) + ' ' + str(dot[0][0] / 255)
-
-                        masks += cell_mask_str + '\n'
-
-                with open(os.path.join(self.config.train_path, dir + '.txt'), 'w') as file:
-                    file.write(masks)
-
-                if self.config.apply_aug:
-                    shutil.rmtree(os.path.join(self.config.data_path, dir))
         logger.info("YOLO formating finished!")
 
     def train_validation_separation(self):
@@ -200,16 +199,14 @@ class DataTransformation:
     def transformation_compose(self):
         if self.config.dataset_val_status:
             if not os.listdir(self.config.train_path) and not os.listdir(self.config.validation_path):
-                if self.config.apply_aug:
-                    self.data_augmentation()
-                    self.data_to_YOLO_formating()
-                    self.train_validation_separation()
-                else:
-                    self.data_to_YOLO_formating()
-                    self.train_validation_separation()
-                
+                logger.info("Data augmentation started!")
+                grayscale_list, color_list = self.balance_augment_data_lists()
+                self.chunk_transform(color_list)
+                self.chunk_transform(grayscale_list)
+                logger.info("Data augmentation finished!")
+                self.data_to_YOLO_formating()
+                self.train_validation_separation()
                 self.dataset_yaml_creation()
-                
             elif not os.path.exists(self.config.YAML_path):
                 logger.info("Transformation already performed!")
                 self.dataset_yaml_creation()

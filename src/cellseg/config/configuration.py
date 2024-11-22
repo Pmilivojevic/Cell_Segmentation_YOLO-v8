@@ -80,7 +80,6 @@ class ConfigurationMananger:
             test_path=config.test_path,
             YAML_path=config.YAML_path,
             val_size=config.val_size,
-            apply_aug=config.apply_aug,
             aug_size=config.aug_size,
             aug_params=params,
             dataset_val_status=status
@@ -94,7 +93,6 @@ class ConfigurationMananger:
         
         model_trainer_config = ModelTrainerConfig(
             root_dir=config.root_dir,
-            experiment_name=config.experiment_name,
             model_names=config.model_names,
             dataset_yaml=config.dataset_yaml,
             model_params=params

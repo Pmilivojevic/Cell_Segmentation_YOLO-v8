@@ -20,11 +20,9 @@ data_transformation:
   test_path: artifacts/data_ingestion/test
   YAML_path: artifacts/data_transformation/dataset.yaml
   val_size: 0.2
-  apply_aug: True
-  aug_size: 5
+  aug_size: 3
 
 model_trainer:
   root_dir: artifacts/model_trainer
-  experiment_name: 200_epochs_
   model_names: [yolov8n-seg.pt, yolo11n-seg.pt]
   dataset_yaml: artifacts/data_transformation/dataset.yaml

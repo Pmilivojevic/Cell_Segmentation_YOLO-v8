@@ -49,7 +49,7 @@ STAGE_NAME = "Model Trainer"
 try:
     logger.info(f">>>>>>>>>>>>>>>>> stage {STAGE_NAME} started <<<<<<<<<<<<<<<<<")
     obj = ModelTrainerTrainingPipeline()
-    results = obj.main()
+    obj.main()
     logger.info(f">>>>>>>>>>>>>>>>> stage {STAGE_NAME} completed <<<<<<<<<<<<<<<<<")
 
 except Exception as e:

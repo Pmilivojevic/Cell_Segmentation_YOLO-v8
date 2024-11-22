@@ -9,6 +9,8 @@ from ensure import ensure_annotations
 from box import ConfigBox
 from pathlib import Path
 from typing import Any, Union
+import cv2
+import numpy as np
 
 @ensure_annotations
 def create_directories(path_to_directories: list, verbose: bool=True):
@@ -102,3 +104,72 @@ def zip_file_extraction(local_path, unzip_path):
         os.remove(local_path)
     else:
         logger.info(f"File {str.split(local_path,'/')[-1]} does not exist!")
+
+# @ensure_annotations
+# def folder_image_masks_creation(folder_path, sample_name, image, masks):
+#     dir_image_path = os.path.join(
+#         folder_path,
+#         sample_name,
+#         'images',
+#     )
+    
+#     os.makedirs(dir_image_path, exist_ok=True)
+#     cv2.imwrite(
+#         os.path.join(dir_image_path, sample_name + '.png'),
+#         image
+#     )
+    
+#     dir_mask_path = os.path.join(
+#         folder_path,
+#         sample_name,
+#         'masks',
+#     )
+    
+#     os.makedirs(dir_mask_path, exist_ok=True)
+#     for i, mask in enumerate(masks):
+#         cv2.imwrite(
+#             os.path.join(dir_mask_path, sample_name + '_mask_' + str(i) + '.png'),
+#             mask
+#         )
+
+def dir_sample_creation(augs, image_name, path):
+    i = 0
+
+    while image_name + '_' + str(i) in os.listdir(path):
+        i += 1
+    
+    dir_image_path = os.path.join(
+        path,
+        image_name + '_' + str(i),
+        'images'
+    )
+    
+    os.makedirs(dir_image_path, exist_ok=True)
+    cv2.imwrite(
+        os.path.join(dir_image_path, image_name + '_' + str(i) + '.png'),
+        augs['image']
+    )
+    
+    augmented_masks = np.split(
+        augs["mask"],
+        augs["mask"].shape[-1],
+        axis=-1
+    )
+    augmented_masks = [mask.squeeze(-1) for mask in augmented_masks]
+    
+    dir_masks_path = os.path.join(
+        path,
+        image_name + '_' + str(i),
+        'masks'
+    )
+    
+    os.makedirs(dir_masks_path, exist_ok=True)
+    
+    for j, mask in enumerate(augmented_masks):
+        cv2.imwrite(
+            os.path.join(
+                dir_masks_path,
+                image_name + '_' + str(i) + '_mask_' + str(j) + '.png'
+            ),
+            mask
+        )
